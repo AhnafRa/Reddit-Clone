@@ -18,15 +18,23 @@ import { IoSparkles } from "react-icons/io5";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlineLogin } from "react-icons/md";
 import { auth } from "../../../firebase/clientApp";
-import { useSetRecoilState } from "recoil";
+import { useResetRecoilState, useSetRecoilState } from "recoil";
 import { authModalState } from "../../../atoms/authModalAtoms";
+import { communityState } from "../../../atoms/communitiesAtom";
 
 type UserMenuProps = {
   user?: User | null;
 };
 
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
+  const resetCommunityState = useResetRecoilState(communityState);
   const setAuthModalState = useSetRecoilState(authModalState);
+
+  const logout = async () => {
+    await signOut(auth);
+    resetCommunityState();
+  };
+
   return (
     <Menu>
       <MenuButton
@@ -46,18 +54,18 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
                   as={FaRedditSquare}
                 />
                 <Flex
-                direction='column'
-                display={{base: 'none', lg:'flex'}}
-                fontSize='8pt'
-                align='flex-start'
-                mr={8}
+                  direction="column"
+                  display={{ base: "none", lg: "flex" }}
+                  fontSize="8pt"
+                  align="flex-start"
+                  mr={8}
                 >
                   <Text fontWeight={700}>
-                    {user?.displayName || user.email?.split('@')[0]}
+                    {user?.displayName || user.email?.split("@")[0]}
                   </Text>
                   <Flex>
-                    <Icon as={IoSparkles} color='brand.100' mr={1} />
-                    <Text color='gray.400'>1 Karma</Text>
+                    <Icon as={IoSparkles} color="brand.100" mr={1} />
+                    <Text color="gray.400">1 Karma</Text>
                   </Flex>
                 </Flex>
               </>
@@ -86,7 +94,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
               fontSize="10pt"
               fontWeight={700}
               _hover={{ bg: "blue.500", color: "white" }}
-              onClick={() => signOut(auth)}
+              onClick={logout}
             >
               <Flex>
                 <Icon fontSize={20} mr={2} as={MdOutlineLogin} />
