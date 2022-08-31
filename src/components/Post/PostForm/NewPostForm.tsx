@@ -1,25 +1,25 @@
-import { Flex, Icon } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { BiPoll } from "react-icons/bi";
-import { BsLink45Deg, BsMic } from "react-icons/bs";
-import { IoDocumentText, IoImageOutline } from "react-icons/io5";
-import TextInputs from "./PostForm/TextInputs";
-import TabItem from "./TabItem";
-import ImageUpload from "./PostForm/ImageUpload";
-import { Post } from "../../atoms/postsAtom";
+import { Alert, AlertIcon, Flex, Icon, Text } from "@chakra-ui/react";
+import { Timestamp } from "@google-cloud/firestore";
 import { User } from "firebase/auth";
-import { useRouter } from "next/router";
 import {
   addDoc,
   collection,
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
-import { Timestamp } from "@google-cloud/firestore";
-import { firestore, storage } from "../../firebase/clientApp";
 import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { BiPoll } from "react-icons/bi";
+import { BsLink45Deg, BsMic } from "react-icons/bs";
+import { IoDocumentText, IoImageOutline } from "react-icons/io5";
+import { Post } from "../../../atoms/postsAtom";
+import { firestore, storage } from "../../../firebase/clientApp";
+import ImageUpload from "./ImageUpload";
+import TextInputs from "./TextInputs";
+import TabItem from "../TabItem";
 
-type NewPostFomProps = {
+type NewPostFormProps = {
   user: User;
 };
 
@@ -51,45 +51,48 @@ export type TabItem = {
   icon: typeof Icon.arguments;
 };
 
-const NewPostFom: React.FC<NewPostFomProps> = ({ user }) => {
+const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState(formTabs[0].title);
   const [textInputs, setTextInputs] = useState({ title: "", body: "" });
   const [selectedFile, setSelectedFile] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleCreatePost = async () => {
-    const { CommunityId } = router.query;
+    const { communityId } = router.query;
     //creating a new post object
     const newPost: Post = {
-      communityId: CommunityId as string,
+      communityId: communityId as string,
       creatorId: user?.uid,
       creatorDisplayName: user.email!.split("@")[0],
       title: textInputs.title,
       body: textInputs.body,
-      numberOfMembers: 0,
+      numberOfComments: 0,
       voteStatus: 0,
       createdAt: serverTimestamp() as Timestamp,
+      id: "",
     };
 
+    setLoading(true);
     try {
       //storing the post into the database
-      const postDocREf = await addDoc(collection(firestore, "posts"), newPost);
+      const postDocRef = await addDoc(collection(firestore, "posts"), newPost);
 
       //Check if the selectedFile
       if (selectedFile) {
-        //store it in storage => getDownloadURL (return imageURL)
-        const imageRef = ref(storage, "posts/${postDocRef.id}/image");
-        //update the post dy by adding the imageURL
+        const imageRef = ref(storage, `posts/${postDocRef.id}/image`);
         await uploadString(imageRef, selectedFile, "data_url");
-        const downloadUrl = await getDownloadURL(imageRef);
-
+        const downloadURL = await getDownloadURL(imageRef);
         await updateDoc(postDocRef, {
-          imageURL: downloadUrl,
+          imageURL: downloadURL,
         });
+        console.log("HERE IS DOWNLOAD URL", downloadURL);
       }
+      router.back();
     } catch (error: any) {
-      console.log("handelCreatePost error", error.message);
+      console.log("handleCreatePost error", error.message);
+      setError(true);
     }
     setLoading(false);
   };
@@ -150,7 +153,13 @@ const NewPostFom: React.FC<NewPostFomProps> = ({ user }) => {
           />
         )}
       </Flex>
+      {error && (
+        <Alert status="error">
+          <AlertIcon />
+          <Text mr={2}>Error creating post</Text>
+        </Alert>
+      )}
     </Flex>
   );
 };
-export default NewPostFom;
+export default NewPostForm;
