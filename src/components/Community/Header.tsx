@@ -4,13 +4,12 @@ import { FaReddit } from "react-icons/fa";
 import { Community } from "../../atoms/communitiesAtom";
 import useCommunityData from "../../hooks/useCommunityData";
 
-
 type HeaderProps = {
   communityData: Community;
 };
 
 const Header: React.FC<HeaderProps> = ({ communityData }) => {
-  const { communityStateValue, onJoinOrLeaveCommunity, loading} =
+  const { communityStateValue, onJoinOrLeaveCommunity, loading } =
     useCommunityData();
   const isJoined = !!communityStateValue.mySnippets.find(
     (item) => item.communityId === communityData.id
@@ -21,8 +20,17 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
       <Box height="50%" bg="blue.400" />
       <Flex justify="center" bg="white" flexGrow={1}>
         <Flex width="95%" maxWidth="860px">
-          {communityData.imageURL ? (
-            <Image />
+          {communityStateValue.currentCommunity?.imageURL ? (
+            <Image
+              borderRadius="full"
+              boxSize="66px"
+              src={communityStateValue.currentCommunity.imageURL}
+              alt="Dan Abramov"
+              position="relative"
+              top={-3}
+              color="blue.500"
+              border="4px solid white"
+            />
           ) : (
             <Icon
               as={FaReddit}
