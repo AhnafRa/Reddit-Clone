@@ -1,10 +1,12 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   increment,
-  writeBatch
+  writeBatch,
 } from "firebase/firestore";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState, useSetRecoilState } from "recoil";
@@ -12,15 +14,16 @@ import { authModalState } from "../atoms/authModalAtoms";
 import {
   Community,
   CommunitySnippet,
-  communityState
+  communityState,
 } from "../atoms/communitiesAtom";
 import { auth, firestore } from "../firebase/clientApp";
 
 const useCommunityData = () => {
   const [user] = useAuthState(auth);
+  const router = useRouter();
   const [communityStateValue, setCommunityStateValue] =
     useRecoilState(communityState);
-    const setAuthModalState = useSetRecoilState(authModalState)
+  const setAuthModalState = useSetRecoilState(authModalState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -65,25 +68,26 @@ const useCommunityData = () => {
     setLoading(false);
   };
 
-  const joinCommunity = async (community: Community) => {
-    console.log("JOINING COMMUNITY: ", community.id);
+  const joinCommunity = async (communityData: Community) => {
+    console.log("JOINING COMMUNITY: ", communityData.id);
     try {
       const batch = writeBatch(firestore);
 
       const newSnippet: CommunitySnippet = {
-        communityId: community.id,
-        imageURL: community.imageURL || "",
+        communityId: communityData.id,
+        imageURL: communityData.imageURL || "",
+        isModerator: user?.uid === communityData.creatorId,
       };
       batch.set(
         doc(
           firestore,
           `users/${user?.uid}/communitySnippets`,
-          community.id // will for sure have this value at this point
+          communityData.id // will for sure have this value at this point
         ),
         newSnippet
       );
 
-      batch.update(doc(firestore, "communities", community.id), {
+      batch.update(doc(firestore, "communities", communityData.id), {
         numberOfMembers: increment(1),
       });
 
@@ -126,16 +130,42 @@ const useCommunityData = () => {
     }
     setLoading(false);
   };
+
+  const getCommunityData = async (communityId: string) => {
+    try {
+      const communityDocRef = doc(firestore, "communities", communityId);
+      const communityDoc = await getDoc(communityDocRef);
+
+      setCommunityStateValue((prev) => ({
+        ...prev,
+        currentCommunity: {
+          id: communityDoc.id,
+          ...communityDoc.data(),
+        } as Community,
+      }));
+    } catch (error) {
+      console.log("getCommuntiyData", error);
+    }
+  };
+
   useEffect(() => {
     if (!user) {
-      setCommunityStateValue(prev => ({
+      setCommunityStateValue((prev) => ({
         ...prev,
-        mySnippets: []
+        mySnippets: [],
       }));
       return;
-    };
+    }
     getMySnippets();
   }, [user]);
+
+  useEffect(() => {
+    const { communityId } = router.query;
+
+    if (communityId && !communityStateValue.currentCommunity) {
+      getCommunityData(communityId as string);
+    }
+  }, [router.query, communityStateValue.currentCommunity]);
 
   return {
     communityStateValue,
