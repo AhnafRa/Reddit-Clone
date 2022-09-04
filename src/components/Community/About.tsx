@@ -9,20 +9,20 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { updateDoc, doc } from "firebase/firestore";
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
 import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { FaReddit } from "react-icons/fa";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { RiCakeLine } from "react-icons/ri";
-import { useSetRecoilState } from "recoil";
+import { FaReddit } from "react-icons/fa";
 import { Community, communityState } from "../../atoms/communitiesAtom";
 import { auth, firestore, storage } from "../../firebase/clientApp";
 import useSelectFile from "../../hooks/useSelectFile";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import { doc, updateDoc } from "firebase/firestore";
+import { useSetRecoilState } from "recoil";
 
 type AboutProps = {
   communityData: Community;
@@ -30,7 +30,7 @@ type AboutProps = {
 
 const About: React.FC<AboutProps> = ({ communityData }) => {
   const [user] = useAuthState(auth);
-  const selectedFileRef = useRef<HTMLInputElement>();
+  const selectedFileRef = useRef<HTMLInputElement>(null);
   const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile();
   const [uploadingImage, setUploadingImage] = useState(false);
   const setCommunityStateValue = useSetRecoilState(communityState);
@@ -74,7 +74,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
         </Text>
         <Icon as={HiOutlineDotsHorizontal} />
       </Flex>
-      <Flex direction="column" bg="white" borderRadius="0px 0px 4px 4px">
+      <Flex direction="column" p={3} bg="white" borderRadius="0px 0px 4px 4px">
         <Stack>
           <Flex width="100%" p={2} fontSize="10pt" fontWeight={700}>
             <Flex direction="column" flexGrow={1}>
@@ -99,7 +99,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
               <Text>
                 Created{" "}
                 {moment(
-                  new Date(communityData.createdAt?.seconds * 1000)
+                  new Date(communityData.createdAt.seconds * 1000)
                 ).format("MMM DD, YYYY")}
               </Text>
             )}
@@ -128,7 +128,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                       src={selectedFile || communityData.imageURL}
                       borderRadius="full"
                       boxSize="40px"
-                      alt="Community Page"
+                      alt="Community Image"
                     />
                   ) : (
                     <Icon
