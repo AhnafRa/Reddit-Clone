@@ -1,19 +1,11 @@
-import {
-  Box,
-  Flex,
-  Icon,
-  Menu,
-  MenuItem,
-  MenuList,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Flex, Icon, MenuItem, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { FaReddit } from "react-icons/fa";
+import CreateCommunityModal from "../../Modal/CreateCommunity/CreateCommunityModal";
 import { GrAdd } from "react-icons/gr";
 import { useRecoilValue } from "recoil";
 import { communityState } from "../../../atoms/communitiesAtom";
-import CreateCommunityModal from "../../Modal/CreateCommunity/CreateCommunityModal";
 import MenuListItem from "./MenuListItem";
+import { FaReddit } from "react-icons/fa";
 
 type CommunitiesProps = {};
 

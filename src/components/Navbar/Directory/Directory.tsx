@@ -1,5 +1,13 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { Menu, MenuButton, MenuList, Flex, Icon, Text, Image } from "@chakra-ui/react";
+import {
+  Flex,
+  Icon,
+  Image,
+  Menu,
+  MenuButton,
+  MenuList,
+  Text,
+} from "@chakra-ui/react";
 import React from "react";
 import { TiHome } from "react-icons/ti";
 import useDirectory from "../../../hooks/useDirectory";
@@ -26,7 +34,12 @@ const Directory: React.FC = () => {
         >
           <Flex align="center">
             {directoryState.selectedMenuItem.imageURL ? (
-              <Image src={directoryState.selectedMenuItem.imageURL} borderRadius='full' boxSize='24px' mr={2} />
+              <Image
+                src={directoryState.selectedMenuItem.imageURL}
+                borderRadius="full"
+                boxSize="24px"
+                mr={2}
+              />
             ) : (
               <Icon
                 fontSize={24}
@@ -50,5 +63,4 @@ const Directory: React.FC = () => {
     </Menu>
   );
 };
-
 export default Directory;
