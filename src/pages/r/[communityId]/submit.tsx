@@ -9,23 +9,31 @@ import NewPostForm from "../../../components/Post/PostForm/NewPostForm";
 import { auth } from "../../../firebase/clientApp";
 import useCommunityData from "../../../hooks/useCommunityData";
 
-const submit: React.FC = () => {
+const SubmitPostPage: React.FC = () => {
   const [user] = useAuthState(auth);
   // const communityStateValue = useRecoilValue(communityState);
   const { communityStateValue } = useCommunityData();
   console.log("COMMUNITY", communityStateValue);
+
   return (
     <PageContent>
       <>
         <Box p="14px 0px" borderBottom="1px solid" borderColor="white">
           <Text>Create a post</Text>
         </Box>
-        {user && <NewPostForm user={user} communityImageURL={communityStateValue.currentCommunity?.imageURL} />}
+        {user && (
+          <NewPostForm
+            user={user}
+            communityImageURL={communityStateValue.currentCommunity?.imageURL}
+          />
+        )}
       </>
       <>
-        {communityStateValue.currentCommunity && (<About communityData ={communityStateValue.currentCommunity} />)}
+        {communityStateValue.currentCommunity && (
+          <About communityData={communityStateValue.currentCommunity} />
+        )}
       </>
     </PageContent>
   );
 };
-export default submit;
+export default SubmitPostPage;
